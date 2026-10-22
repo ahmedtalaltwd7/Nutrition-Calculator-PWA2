@@ -1,0 +1,27 @@
+{
+  "id": "/",
+  "name": "NutriCalc — Nutrition Calculator",
+  "short_name": "NutriCalc",
+  "description": "Private, offline estimates for BMI, ideal body weight, and daily energy needs.",
+  "lang": "en",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#f5f8f5",
+  "theme_color": "#f5f8f5",
+  "icons": [
+    {
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
