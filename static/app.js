@@ -29,6 +29,7 @@ const messages = {
 		yourSnapshot: 'YOUR WELLNESS SNAPSHOT', resultsTitle: 'Your results', saveRecord: 'Save record', print: 'Print',
 		disclaimer: 'BMI, IBW and calorie estimates are not medical diagnoses or individualized medical advice. Consult a qualified healthcare professional for guidance.',
 		storedLocally: 'STORED ON THIS DEVICE', recordsTitle: 'Saved records', clearAll: 'Clear all',
+		exportExcel: 'Export Excel',
 		viewRecords: 'View saved records', hideRecords: 'Hide saved records',
 		noRecords: 'Your saved results will appear here. Nothing is saved unless you choose to save it.',
 		footerNote: 'Made for mindful, informed wellbeing.', worksOffline: 'Works offline', online: 'Online', offline: 'Offline',
@@ -43,12 +44,13 @@ const messages = {
 		recordDeleted: 'Saved record deleted.', recordsCleared: 'All saved records cleared.',
 		bmi: 'Body mass index', ibw: 'Ideal body weight', bmr: 'Basal metabolic rate',
 		tdee: 'Estimated daily energy', profile: 'Your details', activityResult: 'Activity level',
-		multiplier: 'Activity factor', name: 'Name', gender: 'Gender', age: 'Age',
+		multiplier: 'Activity factor', bmiCategory: 'BMI category', name: 'Name', gender: 'Gender', age: 'Age',
 		height: 'Height', weight: 'Weight', maleValue: 'Male', femaleValue: 'Female',
 		underweight: 'Underweight', normal: 'Normal weight', overweight: 'Overweight',
 		obese: 'Obese', severe: 'Severe obesity', kcalDay: 'kcal / day', savedAt: 'Saved',
 		deleteRecord: 'Delete record', kcal: 'kcal/day', noName: 'Personal results',
 		approximation: 'Estimates only', weightUnit: 'kg', ageUnit: 'years', heightUnit: 'cm',
+		noValue: 'Not provided', savedRecordsFile: 'NutriCalc saved records',
 		printTitle: 'NutriCalc results', savedList: 'Saved results', errorOffline: 'App shell is not cached yet. Reconnect once, then reload to finish offline setup.'
 	},
 	ar: {
@@ -69,6 +71,7 @@ const messages = {
 		yourSnapshot: 'ملخص العافية', resultsTitle: 'نتائجك', saveRecord: 'حفظ النتيجة', print: 'طباعة',
 		disclaimer: 'مؤشر كتلة الجسم والوزن المثالي وتقديرات السعرات ليست تشخيصًا طبيًا أو نصيحة طبية شخصية. استشر مختصًا صحيًا مؤهلًا.',
 		storedLocally: 'محفوظة على هذا الجهاز', recordsTitle: 'النتائج المحفوظة', clearAll: 'حذف الكل',
+		exportExcel: 'تصدير إلى Excel',
 		viewRecords: 'عرض النتائج المحفوظة', hideRecords: 'إخفاء النتائج المحفوظة',
 		noRecords: 'ستظهر نتائجك المحفوظة هنا. لن يتم حفظ أي شيء إلا باختيارك.',
 		footerNote: 'لرفاهية واعية ومستنيرة.', worksOffline: 'يعمل دون اتصال', online: 'متصل', offline: 'دون اتصال',
@@ -83,12 +86,13 @@ const messages = {
 		recordDeleted: 'تم حذف النتيجة المحفوظة.', recordsCleared: 'تم حذف جميع النتائج المحفوظة.',
 		bmi: 'مؤشر كتلة الجسم', ibw: 'الوزن المثالي', bmr: 'معدل الأيض الأساسي',
 		tdee: 'الاحتياج اليومي التقديري', profile: 'بياناتك', activityResult: 'مستوى النشاط',
-		multiplier: 'معامل النشاط', name: 'الاسم', gender: 'الجنس', age: 'العمر',
+		multiplier: 'معامل النشاط', bmiCategory: 'فئة مؤشر كتلة الجسم', name: 'الاسم', gender: 'الجنس', age: 'العمر',
 		height: 'الطول', weight: 'الوزن', maleValue: 'ذكر', femaleValue: 'أنثى',
 		underweight: 'نقص الوزن', normal: 'وزن طبيعي', overweight: 'زيادة الوزن',
 		obese: 'سمنة', severe: 'سمنة مفرطة', kcalDay: 'سعرة / يوم', savedAt: 'تاريخ الحفظ',
 		deleteRecord: 'حذف النتيجة', kcal: 'سعرة/يوم', noName: 'نتائج شخصية',
 		approximation: 'تقديرات تقريبية', weightUnit: 'كجم', ageUnit: 'سنة', heightUnit: 'سم',
+		noValue: 'غير متوفر', savedRecordsFile: 'نتائج NutriCalc المحفوظة',
 		printTitle: 'نتائج NutriCalc', savedList: 'النتائج المحفوظة',
 		errorOffline: 'لم يتم تخزين التطبيق بعد. اتصل بالإنترنت مرة واحدة ثم أعد التحميل لإكمال الإعداد.'
 	}
@@ -225,6 +229,14 @@ function escapeHtml(value) {
 	})[character]);
 }
 
+function escapeXml(value) {
+	return String(value)
+		.replace(/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/g, '')
+		.replace(/[&<>"']/g, (character) => ({
+			'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&apos;'
+		})[character]);
+}
+
 function renderResults(result) {
 	const name = result.name.trim() || translate('noName');
 	const gender = translate(result.gender === 'male' ? 'maleValue' : 'femaleValue');
@@ -272,23 +284,82 @@ function renderRecords() {
 	const records = readRecords();
 	const list = $('#records-list');
 	$('#clear-records').hidden = records.length === 0;
+	$('#export-records').hidden = records.length === 0;
 	if (!records.length) {
 		list.innerHTML = `<div class="empty-records"><span class="empty-icon" aria-hidden="true">↗</span><p>${translate('noRecords')}</p></div>`;
 		return;
 	}
 	list.innerHTML = records.map((record) => {
 		const savedAt = new Date(record.createdAt);
-		const dateText = Number.isNaN(savedAt.getTime()) ? '' : new Intl.DateTimeFormat(language === 'ar' ? 'ar' : 'en', {
-			dateStyle: 'medium'
+		const dateText = Number.isNaN(savedAt.getTime()) ? translate('noValue') : new Intl.DateTimeFormat(language === 'ar' ? 'ar' : 'en', {
+			dateStyle: 'medium', timeStyle: 'short'
 		}).format(savedAt);
 		const person = record.name?.trim() || translate('noName');
+		const details = [
+			['gender', translate(record.gender === 'male' ? 'maleValue' : 'femaleValue')],
+			['age', `${formatNumber(record.age)} ${translate('ageUnit')}`],
+			['activityResult', translate(record.activity)],
+			['multiplier', `×${formatNumber(record.factor, 3)}`],
+			['height', `${formatNumber(record.height, 1)} ${translate('heightUnit')}`],
+			['weight', `${formatNumber(record.weight, 1)} ${translate('weightUnit')}`],
+			['bmi', formatNumber(record.bmi, 1)],
+			['bmiCategory', translate(record.category)],
+			['ibw', `${formatNumber(record.ibw, 1)} ${translate('weightUnit')}`],
+			['bmr', `${formatNumber(Math.round(record.bmr))} ${translate('kcal')}`],
+			['tdee', `${formatNumber(Math.round(record.tdee))} ${translate('kcal')}`]
+		];
 		return `<article class="saved-record">
 			<div class="saved-record-mark" aria-hidden="true">${record.gender === 'female' ? '♀' : '♂'}</div>
-			<div class="saved-record-main"><strong>${escapeHtml(person)}</strong><span>${translate('bmi')} ${formatNumber(record.bmi, 1)} · ${translate('tdee')} ${formatNumber(Math.round(record.tdee))} ${translate('kcal')}</span></div>
-			<time datetime="${escapeHtml(record.createdAt)}">${escapeHtml(dateText)}</time>
+			<div class="saved-record-main"><strong>${escapeHtml(person)}</strong><time datetime="${escapeHtml(record.createdAt || '')}">${escapeHtml(dateText)}</time></div>
 			<button class="icon-button delete-record" type="button" data-record-id="${escapeHtml(record.id)}" aria-label="${translate('deleteRecord')}" title="${translate('deleteRecord')}">×</button>
+			<div class="saved-record-details">${details.map(([label, value]) => `
+				<div class="saved-record-detail"><span>${translate(label)}</span><strong>${escapeHtml(value)}</strong></div>
+			`).join('')}</div>
 		</article>`;
 	}).join('');
+}
+
+function exportRecords() {
+	const records = readRecords();
+	if (!records.length) return;
+
+	const columns = [
+		['name', (record) => record.name?.trim() || translate('noName'), 'String'],
+		['gender', (record) => translate(record.gender === 'male' ? 'maleValue' : 'femaleValue'), 'String'],
+		['age', (record) => record.age, 'Number'],
+		['activityResult', (record) => translate(record.activity), 'String'],
+		['multiplier', (record) => record.factor, 'Number'],
+		['height', (record) => record.height, 'Number'],
+		['weight', (record) => record.weight, 'Number'],
+		['bmi', (record) => record.bmi, 'Number'],
+		['bmiCategory', (record) => translate(record.category), 'String'],
+		['ibw', (record) => record.ibw, 'Number'],
+		['bmr', (record) => Math.round(record.bmr), 'Number'],
+		['tdee', (record) => Math.round(record.tdee), 'Number'],
+		['savedAt', (record) => record.createdAt || '', 'String']
+	];
+	const cell = (value, type) => {
+		const validNumber = type === 'Number' && Number.isFinite(value);
+		const safeValue = validNumber ? value : (value ?? '');
+		const safeType = validNumber ? 'Number' : 'String';
+		return `<Cell><Data ss:Type="${safeType}">${escapeXml(safeValue)}</Data></Cell>`;
+	};
+	const rows = [
+		`<Row>${columns.map(([label]) => cell(translate(label), 'String')).join('')}</Row>`,
+		...records.map((record) => `<Row>${columns.map(([, getValue, type]) => cell(getValue(record), type)).join('')}</Row>`)
+	];
+	const workbook = `<?xml version="1.0" encoding="UTF-8"?>
+		<Workbook xmlns="urn:schemas-microsoft-com:office:spreadsheet"
+			xmlns:ss="urn:schemas-microsoft-com:office:spreadsheet">
+			<Worksheet ss:Name="${escapeXml(translate('savedRecordsFile'))}"><Table>${rows.join('')}</Table></Worksheet>
+		</Workbook>`;
+	const blob = new Blob([workbook], { type: 'application/vnd.ms-excel;charset=utf-8' });
+	const url = URL.createObjectURL(blob);
+	const link = document.createElement('a');
+	link.href = url;
+	link.download = `nutricalc-saved-records-${new Date().toISOString().slice(0, 10)}.xls`;
+	link.click();
+	setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
 function openConfirmation(target) {
@@ -381,6 +452,7 @@ $('#records-list').addEventListener('click', (event) => {
 	if (button) openConfirmation(button.dataset.recordId);
 });
 $('#clear-records').addEventListener('click', () => openConfirmation('all'));
+$('#export-records').addEventListener('click', exportRecords);
 dialog.addEventListener('close', () => {
 	if (dialog.returnValue === 'delete') performDelete();
 });

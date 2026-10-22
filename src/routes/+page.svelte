@@ -154,6 +154,7 @@
 			<div><span class="section-kicker" data-i18n="storedLocally">STORED ON THIS DEVICE</span><h2 id="records-title" data-i18n="recordsTitle">Saved records</h2></div>
 			<div class="records-actions">
 				<button class="button button-quiet" id="view-records" type="button" data-i18n="viewRecords">View saved records</button>
+				<button class="button button-quiet" id="export-records" type="button" hidden data-i18n="exportExcel">Export Excel</button>
 				<button class="button button-quiet clear-all-button" id="clear-records" type="button" hidden data-i18n="clearAll">Clear all</button>
 			</div>
 		</div>

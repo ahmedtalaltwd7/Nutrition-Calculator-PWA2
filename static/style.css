@@ -154,12 +154,15 @@ h1, h2, h3, p { margin-top: 0; }
 .empty-records { display: flex; align-items: center; gap: 12px; min-height: 66px; padding: 13px 17px; border: 1px dashed #dfe7e0; border-radius: 12px; background: rgba(255,255,255,.45); }
 .empty-icon { display: grid; flex: 0 0 auto; place-items: center; width: 31px; height: 31px; border-radius: 10px; background: #eff4ef; color: #85a28b; font-size: 16px; }
 .empty-records p { margin: 0; color: #8b9690; font-size: 10px; line-height: 1.55; }
-.saved-record { display: flex; align-items: center; gap: 11px; min-width: 0; padding: 12px 13px; border: 1px solid #e5ebe6; border-radius: 12px; background: #fff; }
+.saved-record { display: grid; grid-template-columns: 32px minmax(0, 1fr) auto; align-items: center; gap: 10px 11px; min-width: 0; padding: 13px; border: 1px solid #e5ebe6; border-radius: 12px; background: #fff; }
 .saved-record-mark { display: grid; flex: 0 0 auto; place-items: center; width: 32px; height: 32px; border-radius: 10px; background: #eef4ef; color: #668b70; font-size: 17px; }
 .saved-record-main { display: grid; min-width: 0; gap: 4px; }
 .saved-record-main strong { overflow: hidden; color: #4b5e53; font-size: 11px; font-weight: 650; text-overflow: ellipsis; white-space: nowrap; }
-.saved-record-main span { overflow: hidden; color: #8a968f; font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
-.saved-record time { margin-inline-start: auto; color: #9aa39d; font-size: 9px; white-space: nowrap; }
+.saved-record-main time { color: #9aa39d; font-size: 9px; }
+.saved-record-details { display: grid; grid-column: 1 / -1; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px 12px; padding-top: 11px; border-top: 1px solid #edf1ed; }
+.saved-record-detail { display: grid; min-width: 0; gap: 3px; }
+.saved-record-detail span { color: #8a968f; font-size: 9px; }
+.saved-record-detail strong { overflow-wrap: anywhere; color: #4b5e53; font-size: 10px; font-weight: 620; }
 .icon-button { display: grid; flex: 0 0 auto; place-items: center; width: 36px; height: 36px; border: 1px solid transparent; border-radius: 9px; background: transparent; color: #a3aaa5; cursor: pointer; font-size: 20px; }
 .icon-button:hover { border-color: #f1ddda; background: #fff7f5; color: #ac5e55; }
 .footer { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 10px; margin-top: 40px; padding-top: 14px; border-top: 1px solid #e7ece8; color: #929d95; font-size: 9px; }
@@ -244,10 +247,10 @@ h1, h2, h3, p { margin-top: 0; }
 	.disclaimer { font-size: 9px; }
 	.records-heading { align-items: end; }
 	.records-actions { gap: 3px; }
-	.records-actions .button { min-height: 36px; padding-inline: 9px; font-size: 9px; }
+	.records-actions .button { flex: 1; min-height: 36px; padding-inline: 7px; font-size: 9px; }
 	.saved-record { gap: 8px; padding: 10px 9px; }
-	.saved-record time { display: none; }
-	.saved-record-main span { max-width: 230px; }
+	.saved-record-main time { font-size: 8px; }
+	.saved-record-details { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 9px; }
 	.footer { justify-content: flex-start; gap: 9px 16px; margin-top: 30px; font-size: 8px; }
 	.footer > :nth-child(2) { flex-basis: 100%; order: 1; }
 }
